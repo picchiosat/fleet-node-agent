@@ -3,24 +3,41 @@
 ============================================================
 
 This script is meant to be installed on each remote node
-(e.g., Raspberry Pi, MMDVM host).
+(e.g., Raspberry Pi, MMDVM host). [cite: 11]
 
 ------------------------------------------------------------
 1. PRE-REQUISITES & INSTALLATION
 ------------------------------------------------------------
-Ensure Python 3 is installed.
+Ensure Python 3 is installed. [cite: 12]
 
 Install dependencies:
-   pip install -r requirements.txt
+   sudo git clone https://git.arifvg.it/iv3jdv/fleet-control-agent.git /opt/fleet-control-agent
+   cd /opt/fleet-control-agent
+   sudo python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt [cite: 12]
 
 ------------------------------------------------------------
-2. CONFIGURATION
+2. CONFIGURATION (CRITICAL STEPS)
 ------------------------------------------------------------
-1. Copy 'system_monitor.py' and 'node_config.json' to 
-   your preferred folder (e.g., '/opt/fleet-node_agent/').
-2. Edit 'node_config.json' with a unique 'client_id' and
-   your MQTT broker credentials.
-3. (Optional) Install 'RPi.GPIO' if you want hardware reset.
+A) MAIN CONFIG:
+   cp node_config.json.example node_config.json
+   Edit 'node_config.json' with a unique 'client_id' and
+   your MQTT broker credentials. [cite: 13]
+
+B) MONITORING PROCESSES (process_list.txt):
+   cp process_list.txt.example process_list.txt
+   Add the names of services you want to monitor (one per line). [cite: 8]
+   Example: mmdvmhost
+
+C) REMOTE EDITING FILES (file_list.txt):
+   cp file_list.txt.example file_list.txt
+   Add the full absolute paths of the .ini files you want 
+   to edit remotely from the dashboard. [cite: 10]
+   Example: /etc/MMDVMHost.ini
+
+D) OPTIONAL:
+   Install 'RPi.GPIO' if you want hardware reset. [cite: 14]
 
 ------------------------------------------------------------
 3. RUNNING AS A SERVICE (SYSTEMD)
@@ -36,24 +53,41 @@ Install dependencies:
 ============================================================
 
 Questo script va installato su ogni nodo remoto 
-(es. Raspberry Pi, MMDVM host).
+(es. Raspberry Pi, MMDVM host). [cite: 11]
 
 ------------------------------------------------------------
 1. REQUISITI E INSTALLAZIONE
 ------------------------------------------------------------
-Assicurarsi di avere Python 3 installato.
+Assicurarsi di avere Python 3 installato. [cite: 15]
 
-Installa le dipendenze:
-   pip install -r requirements.txt
+Installazione:
+   sudo git clone https://git.arifvg.it/iv3jdv/fleet-control-agent.git /opt/fleet-control-agent
+   cd /opt/fleet-control-agent
+   sudo python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt [cite: 15]
 
 ------------------------------------------------------------
-2. CONFIGURAZIONE
+2. CONFIGURAZIONE (PASSAGGI CRITICI)
 ------------------------------------------------------------
-1. Copia 'system_monitor.py' e 'node_config.json' in 
-   una cartella (es. '/opt/node_agent/').
-2. Modifica 'node_config.json' inserendo un 'client_id'
-   univoco e i dati del server MQTT.
-3. (Opzionale) Installa 'RPi.GPIO' per il reset hardware.
+A) CONFIGURAZIONE PRINCIPALE:
+   cp node_config.json.example node_config.json
+   Modifica 'node_config.json' inserendo un 'client_id'
+   univoco e i dati del server MQTT. [cite: 16]
+
+B) MONITORAGGIO PROCESSI (process_list.txt):
+   cp process_list.txt.example process_list.txt
+   Aggiungi i nomi dei servizi da monitorare (uno per riga). [cite: 8]
+   Esempio: mmdvmhost
+
+C) EDITING FILE REMOTO (file_list.txt):
+   cp file_list.txt.example file_list.txt
+   Aggiungi i percorsi assoluti dei file .ini che desideri
+   poter modificare remotamente dalla dashboard. [cite: 10]
+   Esempio: /etc/MMDVMHost.ini
+
+D) OPZIONALE:
+   Installa 'RPi.GPIO' per il reset hardware. [cite: 17]
 
 ------------------------------------------------------------
 3. ESECUZIONE COME SERVIZIO (SYSTEMD)
@@ -62,3 +96,4 @@ Installa le dipendenze:
 2. sudo systemctl daemon-reload
 3. sudo systemctl enable fleet-agent
 4. sudo systemctl start fleet-agent
+============================================================
