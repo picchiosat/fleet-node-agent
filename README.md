@@ -19,7 +19,7 @@ The **Fleet Control Agent** is a lightweight monitoring script designed for remo
 
 1. **Clone the repo:**
 
-        git clone https://git.arifvg.it/iv3jdv/web-control-agent.git web-control
+        git clone https://git.arifvg.it/iv3jdv/fleet-control-agent.git web-control
         cd web-control
 
 2. **Install dependencies:**
