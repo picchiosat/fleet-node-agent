@@ -1,0 +1,15 @@
+[Unit]
+Description=Fleet Control - Remote Node Agent
+After=network.target
+
+[Service]
+Type=simple
+# Agent must be run as root for services restart (MMDVMHost etc.) and use GPIO
+User=root
+WorkingDirectory=/opt/node_agent
+ExecStart=/usr/bin/python3 /opt/node_agent/system_monitor.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

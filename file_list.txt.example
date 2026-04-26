@@ -1,0 +1,10 @@
+/etc/MMDVMHost_BM.ini
+/etc/MMDVMHost_PC.ini
+/etc/DMRGateway_BM.ini
+/etc/DMRGateway_PC.ini
+/etc/MMDVMHost.ini
+/etc/DMRGateway.ini
+/etc/NXDNGateway.ini
+/etc/P25Gateway.ini
+/etc/YSFGateway.ini
+/usr/local/etc/dstargateway.cfg

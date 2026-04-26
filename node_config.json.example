@@ -1,0 +1,55 @@
+{
+    "client_id": "repeater_id",
+    "mqtt": {
+        "broker": "127.0.0.1",
+        "port": 1883,
+        "user": "mmdvm",
+        "password": "password",
+        "base_topic": "servizi/repeater_id"
+    },
+    "paths": {
+        "file_list": "/opt/file_list.txt",
+        "process_list": "/opt/process_list.txt"
+    },
+    "settings": {
+        "auto_healing": true,
+        "update_interval": 60
+    },
+    "telegram": {
+        "enabled": false,
+        "token": "TOKEN ID",
+        "chat_id": "CHAT ID"
+    },
+    "profiles": {
+        "A": {
+            "label": "Config BM",
+            "services": [
+                {
+                    "name": "mmdvmhost.service",
+                    "source": "/etc/MMDVMHost_BM.ini",
+                    "target": "/etc/MMDVMHost.ini"
+                },
+                {
+                    "name": "dmrgateway.service",
+                    "source": "/etc/DMRGateway_BM.ini",
+                    "target": "/etc/DMRGateway.ini"
+                }
+            ]
+        },
+        "B": {
+            "label": "Config PC",
+            "services": [
+                {
+                    "name": "mmdvmhost.service",
+                    "source": "/etc/MMDVMHost_PC.ini",
+                    "target": "/etc/MMDVMHost.ini"
+                },
+                {
+                    "name": "dmrgateway.service",
+                    "source": "/etc/DMRGateway_PC.ini",
+                    "target": "/etc/DMRGateway.ini"
+                }
+            ]
+        }
+    }
+}
