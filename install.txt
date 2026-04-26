@@ -17,7 +17,7 @@ Install dependencies:
 2. CONFIGURATION
 ------------------------------------------------------------
 1. Copy 'system_monitor.py' and 'node_config.json' to 
-   your preferred folder (e.g., '/opt/node_agent/').
+   your preferred folder (e.g., '/opt/fleet-node_agent/').
 2. Edit 'node_config.json' with a unique 'client_id' and
    your MQTT broker credentials.
 3. (Optional) Install 'RPi.GPIO' if you want hardware reset.
