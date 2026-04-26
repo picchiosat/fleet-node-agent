@@ -9,6 +9,8 @@
 
 The **Fleet Control Agent** is a lightweight monitoring and control script designed for remote MMDVM nodes. It acts as the bridge between your radio hardware and the Central Console.
 
+> ℹ️ **Note:** This is the Remote Agent repository, intended to be installed on individual repeater nodes. To manage and monitor all your fleet from a single web dashboard, you must also install the [Fleet Control Console (Server)](https://git.arifvg.it/iv3jdv/fleet-control-server) on your central hub.
+
 ### ✨ Key Features
 * **Real-Time Telemetry:** Streams CPU, RAM, Disk usage, and Temperature data via MQTT.
 * **Service Management:** Allows remote Start/Stop/Restart of system daemons (MMDVMHost, DMRGateway, etc.).
@@ -62,6 +64,8 @@ sudo systemctl start fleet-agent
 ## 🇮🇹 Italiano
 
 Il **Fleet Control Agent** è lo script di monitoraggio e controllo per i nodi remoti MMDVM. Funge da ponte tra l'hardware radio e la Console Centrale.
+
+> ℹ️ **Nota:** Questo è il repository dell'Agent Remoto, da installare sui singoli nodi ripetitore. Per gestire e monitorare tutta la flotta da un'unica dashboard web, devi installare anche la [Fleet Control Console (Server)](https://git.arifvg.it/iv3jdv/fleet-control-server) sul tuo hub centrale.
 
 ### ✨ Funzionalità Principali
 * **Telemetria Real-Time:** Invia dati su CPU, RAM, Disco e Temperatura via MQTT.
