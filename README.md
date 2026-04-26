@@ -27,7 +27,7 @@ To enable full functionality, you must configure these three files:
 #### 1. Clone the Repository
 Clone the agent into `/opt` to ensure path consistency:
 ```bash
-sudo git clone [https://git.arifvg.it/iv3jdv/fleet-control-agent.git](https://git.arifvg.it/iv3jdv/fleet-control-agent.git) /opt/fleet-control-agent
+sudo git clone https://git.arifvg.it/iv3jdv/fleet-control-agent.git /opt/fleet-control-agent
 cd /opt/fleet-control-agent
 ```
 
