@@ -16,6 +16,9 @@ The **Fleet Control Agent** is a lightweight monitoring and control script desig
 * **Hardware Reset:** Supports physical MMDVM HAT reset via GPIO pins (requires RPi.GPIO).
 * **Auto-Healing:** Automatically detects service failures and attempts to restart them.
 
+### 🤖 Telegram Bot Integration
+The agent features built-in support for **Telegram Bot** notifications. This allows system administrators to receive real-time alerts regarding node status, offline services, and critical system events directly on their mobile devices. Notifications are highly manageable: they can be dynamically enabled or muted for each individual node directly from the central NOC Fleet Console, ensuring you only get notified when it matters.
+
 ### 🛠️ Core Configuration Files
 To enable full functionality, you must configure these three files:
 * **`node_config.json`**: The main configuration. Here you set your MQTT broker, your unique `client_id` (e.g., `IR3XXX`), and the paths for the lists below.
@@ -43,6 +46,8 @@ sudo pip install -r requirements.txt
 2. **Processes**: `cp process_list.txt.example process_list.txt` and add your service names (one per line).
 3. **Files**: `cp file_list.txt.example file_list.txt` and add the absolute paths to your `.ini` files.
 
+**Note:** To enable Telegram notifications, ensure you have configured your `TELEGRAM_TOKEN` and `CHAT_ID` in the agent's configuration file.
+
 #### 4. Systemd Service (Auto-start)
 ```bash
 sudo cp fleet-agent.service /etc/systemd/system/
@@ -64,6 +69,9 @@ Il **Fleet Control Agent** è lo script di monitoraggio e controllo per i nodi r
 * **Configurazione Remota:** Consente al Server Centrale di modificare i file `.ini` a distanza.
 * **Reset Hardware:** Supporta il reset fisico della scheda MMDVM HAT tramite pin GPIO (richiede RPi.GPIO).
 * **Auto-Healing:** Rileva automaticamente i crash dei servizi e tenta di riavviarli.
+
+### 🤖 Telegram Bot Integration
+L'agent dispone del supporto nativo per le notifiche tramite **Bot Telegram**. Questo permette agli amministratori di sistema di ricevere alert in tempo reale sullo stato dei nodi, sui servizi offline e sugli eventi critici direttamente sul proprio smartphone. La gestione degli avvisi è centralizzata: le notifiche possono essere attivate o silenziate dinamicamente per ogni singolo nodo direttamente dalla Fleet Console centrale, evitando spam inutile.
 
 ### 🛠️ File di Configurazione Chiave
 Per il corretto funzionamento, è necessario definire i parametri in questi tre file:
@@ -91,6 +99,8 @@ sudo pip install -r requirements.txt
 1. **Config Principale**: `cp node_config.json.example node_config.json` e inserisci i dati MQTT.
 2. **Processi**: `cp process_list.txt.example process_list.txt` e aggiungi i nomi dei tuoi servizi (uno per riga).
 3. **File**: `cp file_list.txt.example file_list.txt` e inserisci i percorsi assoluti dei tuoi file `.ini`.
+
+**Nota:** Per abilitare le notifiche Telegram, assicurati di aver configurato il tuo `TELEGRAM_TOKEN` e il `CHAT_ID` nel file di configurazione dell'agent.
 
 #### 4. Esecuzione come Servizio (systemd)
 ```bash
