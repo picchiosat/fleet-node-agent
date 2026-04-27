@@ -33,6 +33,7 @@ To enable full functionality, you must configure these three files:
 All installation steps must be executed as the `root` user. Before starting, elevate your privileges by running:
 ```bash
 sudo su
+```
 
 #### 1. Clone the Repository
 Clone the agent into `/opt` to ensure path consistency:
@@ -94,6 +95,7 @@ Per il corretto funzionamento, è necessario definire i parametri in questi tre 
 Tutti i passaggi di installazione devono essere eseguiti come utente `root`. Prima di iniziare, eleva i tuoi privilegi eseguendo:
 ```bash
 sudo su
+```
 
 #### 1. Clonazione del Repository
 Clona l'agente nella cartella `/opt` per garantire la coerenza con i servizi systemd:
