@@ -29,6 +29,11 @@ To enable full functionality, you must configure these three files:
 
 ### 🚀 Installation Guide
 
+#### 0. Root Privileges
+All installation steps must be executed as the `root` user. Before starting, elevate your privileges by running:
+```bash
+sudo su
+
 #### 1. Clone the Repository
 Clone the agent into `/opt` to ensure path consistency:
 ```bash
@@ -40,7 +45,7 @@ cd /opt/fleet-node-agent
 ```bash
 sudo python3 -m venv venv
 source venv/bin/activate
-sudo pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 #### 3. Configuration
@@ -52,10 +57,10 @@ sudo pip install -r requirements.txt
 
 #### 4. Systemd Service (Auto-start)
 ```bash
-sudo cp fleet-agent.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable fleet-agent
-sudo systemctl start fleet-agent
+cp fleet-agent.service /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable fleet-agent
+systemctl start fleet-agent
 ```
 
 ---
@@ -85,6 +90,11 @@ Per il corretto funzionamento, è necessario definire i parametri in questi tre 
 
 ### 🚀 Guida all'Installazione
 
+#### 0. Privilegi di Root
+Tutti i passaggi di installazione devono essere eseguiti come utente `root`. Prima di iniziare, eleva i tuoi privilegi eseguendo:
+```bash
+sudo su
+
 #### 1. Clonazione del Repository
 Clona l'agente nella cartella `/opt` per garantire la coerenza con i servizi systemd:
 ```bash
@@ -96,7 +106,7 @@ cd /opt/fleet-node-agent
 ```bash
 sudo python3 -m venv venv
 source venv/bin/activate
-sudo pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 #### 3. Personalizzazione
@@ -108,10 +118,10 @@ sudo pip install -r requirements.txt
 
 #### 4. Esecuzione come Servizio (systemd)
 ```bash
-sudo cp fleet-agent.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable fleet-agent
-sudo systemctl start fleet-agent
+cp fleet-agent.service /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable fleet-agent
+systemctl start fleet-agent
 ```
 
 ---

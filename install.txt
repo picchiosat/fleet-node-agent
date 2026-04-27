@@ -6,6 +6,13 @@ This script is meant to be installed on each remote node
 (e.g., Raspberry Pi, MMDVM host). [cite: 11]
 
 ------------------------------------------------------------
+0. IMPORTANT: ROOT PRIVILEGES
+------------------------------------------------------------
+All installation steps must be executed as the "root" user.
+Before starting, elevate your privileges by running:
+   sudo su
+
+------------------------------------------------------------
 1. PRE-REQUISITES & INSTALLATION
 ------------------------------------------------------------
 Ensure Python 3 is installed. [cite: 12]
@@ -42,10 +49,10 @@ D) OPTIONAL:
 ------------------------------------------------------------
 3. RUNNING AS A SERVICE (SYSTEMD)
 ------------------------------------------------------------
-1. sudo cp fleet-agent.service /etc/systemd/system/
-2. sudo systemctl daemon-reload
-3. sudo systemctl enable fleet-agent
-4. sudo systemctl start fleet-agent
+1. cp fleet-agent.service /etc/systemd/system/
+2. systemctl daemon-reload
+3. systemctl enable fleet-agent
+4. systemctl start fleet-agent
 
 
 ============================================================
@@ -54,6 +61,13 @@ D) OPTIONAL:
 
 Questo script va installato su ogni nodo remoto 
 (es. Raspberry Pi, MMDVM host). [cite: 11]
+
+------------------------------------------------------------
+0. IMPORTANTE: PRIVILEGI DI ROOT
+------------------------------------------------------------
+Tutti i passaggi di installazione devono essere eseguiti 
+come utente "root". Prima di iniziare, eleva i tuoi privilegi:
+   sudo su
 
 ------------------------------------------------------------
 1. REQUISITI E INSTALLAZIONE
@@ -92,8 +106,8 @@ D) OPZIONALE:
 ------------------------------------------------------------
 3. ESECUZIONE COME SERVIZIO (SYSTEMD)
 ------------------------------------------------------------
-1. sudo cp fleet-agent.service /etc/systemd/system/
-2. sudo systemctl daemon-reload
-3. sudo systemctl enable fleet-agent
-4. sudo systemctl start fleet-agent
+1. cp fleet-agent.service /etc/systemd/system/
+2. systemctl daemon-reload
+3. systemctl enable fleet-agent
+4. systemctl start fleet-agent
 ============================================================
