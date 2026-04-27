@@ -7,7 +7,7 @@ Type=simple
 # Agent must be run as root for services restart (MMDVMHost etc.) and use GPIO
 User=root
 WorkingDirectory=/opt/fleet-node-agent
-ExecStart=/usr/bin/python3 /opt/fleet-node-agent/system_monitor.py
+ExecStart=/opt/fleet-node-agent/venv/bin/python3 /opt/fleet-node-agent/system_monitor.py
 Restart=always
 RestartSec=10
 
