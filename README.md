@@ -88,7 +88,7 @@ Per il corretto funzionamento, è necessario definire i parametri in questi tre 
 #### 1. Clonazione del Repository
 Clona l'agente nella cartella `/opt` per garantire la coerenza con i servizi systemd:
 ```bash
-sudo git clone https://git.arifvg.it/iv3jdv/fleet-node-agent.git]ode-agent.git /opt/fleet-node-agent
+sudo git clone https://git.arifvg.it/iv3jdv/fleet-node-agent.git /opt/fleet-node-agent
 cd /opt/fleet-node-agent
 ```
 
