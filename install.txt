@@ -11,8 +11,8 @@ This script is meant to be installed on each remote node
 Ensure Python 3 is installed. [cite: 12]
 
 Install dependencies:
-   sudo git clone https://git.arifvg.it/iv3jdv/fleet-control-agent.git /opt/fleet-control-agent
-   cd /opt/fleet-control-agent
+   sudo git clone https://git.arifvg.it/iv3jdv/fleet-node-agent.git /opt/fleet-node-agent
+   cd /opt/fleet-node-agent
    sudo python3 -m venv venv
    source venv/bin/activate
    pip install -r requirements.txt [cite: 12]
@@ -61,8 +61,8 @@ Questo script va installato su ogni nodo remoto
 Assicurarsi di avere Python 3 installato. [cite: 15]
 
 Installazione:
-   sudo git clone https://git.arifvg.it/iv3jdv/fleet-control-agent.git /opt/fleet-control-agent
-   cd /opt/fleet-control-agent
+   sudo git clone https://git.arifvg.it/iv3jdv/fleet-node-agent.git /opt/fleet-node-agent
+   cd /opt/fleet-node-agent
    sudo python3 -m venv venv
    source venv/bin/activate
    pip install -r requirements.txt [cite: 15]
