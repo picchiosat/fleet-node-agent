@@ -1,5 +1,5 @@
 ============================================================
-       INSTALLATION GUIDE - FLEET CONTROL AGENT
+       INSTALLATION GUIDE - FLEET NODE AGENT
 ============================================================
 
 This script is meant to be installed on each remote node

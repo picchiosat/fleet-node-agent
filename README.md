@@ -1,4 +1,4 @@
-# 🛰️ Fleet Control Agent
+# 🛰️ Fleet Node Agent
 
 🌍 *[Read in English](#english) | 🇮🇹 [Leggi in Italiano](#italiano)*
 
