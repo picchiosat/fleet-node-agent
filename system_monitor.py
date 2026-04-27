@@ -14,12 +14,17 @@ import configparser
 import logging
 from logging.handlers import RotatingFileHandler
 
+# --- CALCOLO PERCORSI DINAMICI ---
+AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_FILE = os.path.join(AGENT_DIR, 'node_agent.log')
+CONFIG_FILE = os.path.join(AGENT_DIR, 'node_config.json')
+
 # ==========================================
 # 0. LOGGING & HARDWARE CONFIGURATION
 # ==========================================
 logging.basicConfig(
     handlers=[
-        RotatingFileHandler('/opt/node_agent.log', maxBytes=2000000, backupCount=3),
+        RotatingFileHandler(LOG_FILE, maxBytes=2000000, backupCount=3),
         logging.StreamHandler()
     ],
     level=logging.INFO,
@@ -38,7 +43,7 @@ except ImportError:
 # ==========================================
 # 1. UNIFIED CONFIGURATION LOADING
 # ==========================================
-CONFIG_PATH = Path("/opt/node_config.json")
+CONFIG_PATH = Path(CONFIG_FILE)
 
 def load_config():
     try:
@@ -170,10 +175,7 @@ def get_system_status():
         "disk_usage_percent": psutil.disk_usage('/').percent,
         "processes": {},
         "timestamp": time.strftime("%H:%M:%S"),
-        "profiles": {
-            "A": cfg.get('profiles', {}).get('A', {}).get('label', 'PROFILE A'),
-            "B": cfg.get('profiles', {}).get('B', {}).get('label', 'PROFILE B')
-        }
+        "profiles": { k: v.get('label', f'PROFILE {k}') for k, v in cfg.get('profiles', {}).items() }
     }
     proc_path = Path(cfg['paths'].get('process_list', ''))
     if proc_path.exists():
