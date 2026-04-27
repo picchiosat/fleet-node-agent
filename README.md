@@ -44,7 +44,7 @@ cd /opt/fleet-node-agent
 
 #### 2. Virtual Environment Setup
 ```bash
-sudo python3 -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
@@ -106,7 +106,7 @@ cd /opt/fleet-node-agent
 
 #### 2. Setup Ambiente Virtuale (venv)
 ```bash
-sudo python3 -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
