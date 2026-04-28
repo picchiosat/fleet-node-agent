@@ -46,6 +46,13 @@ C) REMOTE EDITING FILES (file_list.txt):
 D) OPTIONAL:
    Install 'RPi.GPIO' if you want hardware reset. [cite: 14]
 
+E) MULTIPLE PROFILES (Dynamic Profiles):
+   In 'node_config.json', you can define custom setup profiles
+   under the "profiles" block. The web dashboard will automatically 
+   generate a dedicated button for each profile you define here.
+   If you don't need this feature, simply leave it empty:
+   "profiles": {}
+
 ------------------------------------------------------------
 3. RUNNING AS A SERVICE (SYSTEMD)
 ------------------------------------------------------------
@@ -102,6 +109,13 @@ C) EDITING FILE REMOTO (file_list.txt):
 
 D) OPZIONALE:
    Installa 'RPi.GPIO' per il reset hardware. [cite: 17]
+
+E) PROFILI MULTIPLI (Dynamic Profiles):
+   In 'node_config.json', puoi definire profili personalizzati
+   sotto il blocco "profiles". La dashboard web genererà in 
+   automatico un tasto dedicato per ogni profilo inserito.
+   Se non ti serve questa funzione, lascialo vuoto:
+   "profiles": {}
 
 ------------------------------------------------------------
 3. ESECUZIONE COME SERVIZIO (SYSTEMD)

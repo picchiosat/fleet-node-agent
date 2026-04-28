@@ -18,6 +18,12 @@ The **Fleet Control Agent** is a lightweight monitoring and control script desig
 * **Hardware Reset:** Supports physical MMDVM HAT reset via GPIO pins (requires RPi.GPIO).
 * **Auto-Healing:** Automatically detects service failures and attempts to restart them.
 
+### 🔄 Dynamic Profiles (Multiple Configurations)
+The agent supports unlimited dynamic profile switching (e.g., switching between a BrandMeister and a DMR+ configuration on the fly). 
+
+In your `node_config.json`, you can define any number of custom profiles under the `"profiles"` key. For each profile, specify a label and the list of services/files to swap. 
+The Central Console dashboard will automatically read this configuration and dynamically generate a button for each profile. If you don't need profile switching for a specific node, simply leave the dictionary empty (`"profiles": {}` or remove the block entirely). The dashboard will gracefully hide the profile controls for that node, keeping the UI clean.
+
 ### 🤖 Telegram Bot Integration
 The agent features built-in support for **Telegram Bot** notifications. This allows system administrators to receive real-time alerts regarding node status, offline services, and critical system events directly on their mobile devices. Notifications are highly manageable: they can be dynamically enabled or muted for each individual node directly from the central NOC Fleet Console, ensuring you only get notified when it matters.
 
@@ -79,6 +85,12 @@ Il **Fleet Control Agent** è lo script di monitoraggio e controllo per i nodi r
 * **Configurazione Remota:** Consente al Server Centrale di modificare i file `.ini` a distanza.
 * **Reset Hardware:** Supporta il reset fisico della scheda MMDVM HAT tramite pin GPIO (richiede RPi.GPIO).
 * **Auto-Healing:** Rileva automaticamente i crash dei servizi e tenta di riavviarli.
+
+### 🔄 Profili Dinamici Multipli (Dynamic Profiles)
+L'agent supporta il cambio rapido tra un numero illimitato di configurazioni (es. per passare "al volo" da un setup BrandMeister a uno DMR+).
+
+Nel file `node_config.json`, puoi definire quanti profili desideri sotto la chiave `"profiles"`. Per ogni profilo, ti basta specificare un'etichetta (label) e i servizi/file da scambiare.
+La dashboard centrale leggerà questa configurazione e genererà dinamicamente un pulsante per ogni profilo inserito. Se un nodo non necessita di questa funzione, è sufficiente lasciare il dizionario vuoto (`"profiles": {}` o rimuovere del tutto il blocco). La dashboard capirà in automatico di dover nascondere i controlli dei profili per quel nodo specifico, mantenendo l'interfaccia pulita.
 
 ### 🤖 Telegram Bot Integration
 L'agent dispone del supporto nativo per le notifiche tramite **Bot Telegram**. Questo permette agli amministratori di sistema di ricevere alert in tempo reale sullo stato dei nodi, sui servizi offline e sugli eventi critici direttamente sul proprio smartphone. La gestione degli avvisi è centralizzata: le notifiche possono essere attivate o silenziate dinamicamente per ogni singolo nodo direttamente dalla Fleet Console centrale, evitando spam inutile.
