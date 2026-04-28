@@ -345,7 +345,7 @@ def on_message(client, userdata, msg):
 
     elif topic == TOPIC_CMD:
         cmd = payload.upper()
-        if cmd in ["A", "B"]:
+        if cmd in cfg.get('profiles', {}).keys():
             current_status = switch_config(cmd)
             client.publish(TOPIC_STAT, current_status, retain=True)
             boot_recovered = True
