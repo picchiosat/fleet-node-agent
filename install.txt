@@ -53,6 +53,13 @@ E) MULTIPLE PROFILES (Dynamic Profiles):
    If you don't need this feature, simply leave it empty:
    "profiles": {}
 
+F) HARDWARE RESET CONFIGURATION:
+   In 'node_config.json' under "settings", define your hardware 
+   reset method to recover stuck modems automatically:
+   - For USB modems: set "usb_reset_id" (e.g., "0483:374b").
+   - For GPIO HATs: set "gpio_reset_pin" (e.g., 21).
+   Leave "usb_reset_id" empty ("") to force GPIO usage.
+
 ------------------------------------------------------------
 3. RUNNING AS A SERVICE (SYSTEMD)
 ------------------------------------------------------------
@@ -116,6 +123,13 @@ E) PROFILI MULTIPLI (Dynamic Profiles):
    automatico un tasto dedicato per ogni profilo inserito.
    Se non ti serve questa funzione, lascialo vuoto:
    "profiles": {}
+
+F) CONFIGURAZIONE RESET HARDWARE:
+   In 'node_config.json' sotto "settings", definisci il metodo 
+   di reset per sbloccare i modem bloccati:
+   - Per modem USB: imposta "usb_reset_id" (es. "0483:374b").
+   - Per HAT GPIO: imposta "gpio_reset_pin" (es. 21).
+   Lascia "usb_reset_id" vuoto ("") per forzare l'uso del GPIO.
 
 ------------------------------------------------------------
 3. ESECUZIONE COME SERVIZIO (SYSTEMD)

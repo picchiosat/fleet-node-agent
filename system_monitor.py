@@ -199,25 +199,36 @@ def check_auto_healing(client, status):
                 client.publish(f"devices/{CLIENT_ID}/logs", msg)
                 send_telegram_message(msg)
                 
-                # --- START MODIFICATION: SPECIFIC HARDWARE RESET FOR MMDVMHOST ---
-                if proc_name.lower() == "mmdvmhost" and GPIO_AVAILABLE:
-                    logger.info("Executing automatic HAT RESET before restarting MMDVMHost...")
-                    try:
-                        RESET_PIN = 21 # Ensure the PIN is correct for your nodes
-                        GPIO.setwarnings(False)
-                        GPIO.setmode(GPIO.BCM)
-                        GPIO.setup(RESET_PIN, GPIO.OUT)
-                        # LOW pulse to reset
-                        GPIO.output(RESET_PIN, GPIO.LOW)
-                        time.sleep(0.5)
-                        GPIO.output(RESET_PIN, GPIO.HIGH)
-                        GPIO.cleanup(RESET_PIN)
-                        # Give the microcontroller time to restart
-                        time.sleep(1.5)
-                        client.publish(f"devices/{CLIENT_ID}/logs", "🔌 GPIO Pulse (MMDVM Reset) sent!")
-                    except Exception as e:
-                        logger.error(f"GPIO error in auto-healing: {e}")
-                # --- END MODIFICATION ---
+              # --- INIZIO LOGICA RESET HARDWARE PER MMDVMHOST ---
+                if proc_name.lower() == "mmdvmhost":
+                    usb_id = cfg.get('settings', {}).get('usb_reset_id', "").strip()
+                    gpio_pin = cfg.get('settings', {}).get('gpio_reset_pin', 21)
+                    
+                    if usb_id:
+                        logger.info(f"Esecuzione reset USB per il dispositivo {usb_id} prima del riavvio...")
+                        try:
+                            subprocess.run(["sudo", "usbreset", usb_id], check=False)
+                            time.sleep(1.5)
+                            client.publish(f"devices/{CLIENT_ID}/logs", f"🔌 USB Reset ({usb_id}) inviato!")
+                        except Exception as e:
+                            logger.error(f"Errore durante il reset USB in auto-healing: {e}")
+                            
+                    elif GPIO_AVAILABLE and gpio_pin:
+                        logger.info(f"Esecuzione reset GPIO (HAT) sul pin {gpio_pin} prima del riavvio...")
+                        try:
+                            RESET_PIN = int(gpio_pin)
+                            GPIO.setwarnings(False)
+                            GPIO.setmode(GPIO.BCM)
+                            GPIO.setup(RESET_PIN, GPIO.OUT)
+                            GPIO.output(RESET_PIN, GPIO.LOW)
+                            time.sleep(0.5)
+                            GPIO.output(RESET_PIN, GPIO.HIGH)
+                            GPIO.cleanup(RESET_PIN)
+                            time.sleep(1.5)
+                            client.publish(f"devices/{CLIENT_ID}/logs", f"🔌 GPIO Pulse (Pin {RESET_PIN}) inviato!")
+                        except Exception as e:
+                            logger.error(f"Errore GPIO in auto-healing: {e}")
+                # --- FINE LOGICA MODIFICA ---
 
                 subprocess.run(["sudo", "systemctl", "restart", proc_name])
             elif attempts == 3:
@@ -355,10 +366,27 @@ def on_message(client, userdata, msg):
             logger.info("REBOOT command received. Rebooting system...")
             time.sleep(1)
             subprocess.run(["sudo", "reboot"], check=True)
+            
         elif cmd == 'RESET_HAT':
-            RESET_PIN = 21
-            if GPIO_AVAILABLE:
+            usb_id = cfg.get('settings', {}).get('usb_reset_id', "").strip()
+            gpio_pin = cfg.get('settings', {}).get('gpio_reset_pin', 21)
+        
+            if usb_id:
                 try:
+                    logger.info(f"RESET USB manuale inviato al dispositivo {usb_id}")
+                    subprocess.run(["sudo", "usbreset", usb_id], check=False)
+                    time.sleep(1.5)
+                    logger.info("Restarting MMDVMHost...")
+                    subprocess.run(["sudo", "systemctl", "restart", "mmdvmhost"], check=False)
+                    client.publish(f"fleet/{CLIENT_ID}/status", "USB RESET + MMDVM RESTART OK")
+                    client.publish(f"devices/{CLIENT_ID}/logs", f"🔌 USB Reset ({usb_id}) + MMDVMHost Restarted")
+                except Exception as e:
+                    logger.error(f"Errore durante il reset USB/MMDVMHost: {e}")
+                    client.publish(f"fleet/{CLIENT_ID}/status", f"RESET ERROR: {e}")
+                    
+            elif GPIO_AVAILABLE and gpio_pin:
+                try:
+                    RESET_PIN = int(gpio_pin)
                     GPIO.setwarnings(False)
                     GPIO.setmode(GPIO.BCM)
                     GPIO.setup(RESET_PIN, GPIO.OUT)
@@ -366,15 +394,19 @@ def on_message(client, userdata, msg):
                     time.sleep(0.5)
                     GPIO.output(RESET_PIN, GPIO.HIGH)
                     GPIO.cleanup(RESET_PIN)
-                    logger.info(f"RESET pulse sent to GPIO {RESET_PIN}")
+                    logger.info(f"Pulsazione di RESET inviata al GPIO {RESET_PIN}")
                     time.sleep(1.5)
                     logger.info("Restarting MMDVMHost...")
                     subprocess.run(["sudo", "systemctl", "restart", "mmdvmhost"], check=False)
                     client.publish(f"fleet/{CLIENT_ID}/status", "HAT RESET + MMDVM RESTART OK")
-                    client.publish(f"devices/{CLIENT_ID}/logs", "🔌 HAT Reset + MMDVMHost Restarted")
+                    client.publish(f"devices/{CLIENT_ID}/logs", f"🔌 GPIO Reset (Pin {RESET_PIN}) + MMDVMHost Restarted")
                 except Exception as e:
-                    logger.error(f"Error during GPIO/MMDVMHost reset: {e}")
+                    logger.error(f"Errore durante il reset GPIO/MMDVMHost: {e}")
                     client.publish(f"fleet/{CLIENT_ID}/status", f"RESET ERROR: {e}")
+            else:
+                msg = "⚠️ Nessun metodo di reset (USB o GPIO) configurato o disponibile sul nodo."
+                logger.warning(msg)
+                client.publish(f"devices/{CLIENT_ID}/logs", msg)
 
         elif cmd in ["TG:OFF", "TG:ON"]:
             new_state = (cmd == "TG:ON")

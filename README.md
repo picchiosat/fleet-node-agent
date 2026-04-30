@@ -27,6 +27,12 @@ The Central Console dashboard will automatically read this configuration and dyn
 ### 🤖 Telegram Bot Integration
 The agent features built-in support for **Telegram Bot** notifications. This allows system administrators to receive real-time alerts regarding node status, offline services, and critical system events directly on their mobile devices. Notifications are highly manageable: they can be dynamically enabled or muted for each individual node directly from the central NOC Fleet Console, ensuring you only get notified when it matters.
 
+### 🔌 Dynamic Hardware Resets (USB & GPIO)
+The agent can perform surgical hardware resets to stuck modems without rebooting the entire node. You can configure this dynamically in your `node_config.json` under the `"settings"` block:
+* **USB Modems (e.g., STM32 Nucleo):** Set `"usb_reset_id"` to your device's ID (e.g., `"0483:374b"`). This requires the `usbutils` package installed on the host.
+* **GPIO HATs:** Set `"gpio_reset_pin"` to your specific BCM pin (e.g., `21`).
+The agent will automatically prioritize the USB reset. If `"usb_reset_id"` is left empty (`""`), it will gracefully fall back to the GPIO method.
+
 ### 🛠️ Core Configuration Files
 To enable full functionality, you must configure these three files:
 * **`node_config.json`**: The main configuration. Here you set your MQTT broker, your unique `client_id` (e.g., `IR3XXX`), and the paths for the lists below.
@@ -94,6 +100,12 @@ La dashboard centrale leggerà questa configurazione e genererà dinamicamente u
 
 ### 🤖 Telegram Bot Integration
 L'agent dispone del supporto nativo per le notifiche tramite **Bot Telegram**. Questo permette agli amministratori di sistema di ricevere alert in tempo reale sullo stato dei nodi, sui servizi offline e sugli eventi critici direttamente sul proprio smartphone. La gestione degli avvisi è centralizzata: le notifiche possono essere attivate o silenziate dinamicamente per ogni singolo nodo direttamente dalla Fleet Console centrale, evitando spam inutile.
+
+### 🔌 Reset Hardware Dinamico (USB & GPIO)
+L'agente può eseguire reset hardware "chirurgici" ai modem bloccati senza dover riavviare l'intero nodo. Puoi configurare questa funzione dinamicamente nel file `node_config.json` sotto il blocco `"settings"`:
+* **Modem USB (es. STM32 Nucleo):** Imposta `"usb_reset_id"` con l'ID del tuo dispositivo (es. `"0483:374b"`). Richiede il pacchetto `usbutils` installato sul nodo.
+* **HAT GPIO:** Imposta `"gpio_reset_pin"` con il tuo pin BCM specifico (es. `21`).
+L'agente darà sempre priorità al reset USB. Se il campo `"usb_reset_id"` viene lasciato vuoto (`""`), il sistema ripiegherà automaticamente sul metodo GPIO.
 
 ### 🛠️ File di Configurazione Chiave
 Per il corretto funzionamento, è necessario definire i parametri in questi tre file:

@@ -13,7 +13,9 @@
     },
     "settings": {
         "auto_healing": true,
-        "update_interval": 60
+        "update_interval": 60,
+        "usb_reset_id": "",
+        "gpio_reset_pin": 21
     },
     "telegram": {
         "enabled": false,
