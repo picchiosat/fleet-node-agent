@@ -70,7 +70,7 @@ pip install -r requirements.txt
 
 #### 4. Systemd Service (Auto-start)
 ```bash
-cp fleet-agent.service /etc/systemd/system/
+cp systemd/fleet-agent.service /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable fleet-agent
 systemctl start fleet-agent
