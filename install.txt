@@ -63,7 +63,7 @@ F) HARDWARE RESET CONFIGURATION:
 ------------------------------------------------------------
 3. RUNNING AS A SERVICE (SYSTEMD)
 ------------------------------------------------------------
-1. cp fleet-agent.service /etc/systemd/system/
+1. cp systemd/fleet-agent.service /etc/systemd/system/
 2. systemctl daemon-reload
 3. systemctl enable fleet-agent
 4. systemctl start fleet-agent
@@ -134,7 +134,7 @@ F) CONFIGURAZIONE RESET HARDWARE:
 ------------------------------------------------------------
 3. ESECUZIONE COME SERVIZIO (SYSTEMD)
 ------------------------------------------------------------
-1. cp fleet-agent.service /etc/systemd/system/
+1. cp systemd/fleet-agent.service /etc/systemd/system/
 2. systemctl daemon-reload
 3. systemctl enable fleet-agent
 4. systemctl start fleet-agent
