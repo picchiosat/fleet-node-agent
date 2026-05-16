@@ -144,7 +144,7 @@ pip install -r requirements.txt
 
 #### 4. Esecuzione come Servizio (systemd)
 ```bash
-cp fleet-agent.service /etc/systemd/system/
+cp systemd/fleet-agent.service /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable fleet-agent
 systemctl start fleet-agent
