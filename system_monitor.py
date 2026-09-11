@@ -446,27 +446,38 @@ def on_message(client, userdata, msg):
 
 def auto_publish_task(client):
     disconnect_counter = 0
-    update_interval = cfg['settings'].get('update_interval', 30)
     
     while True:
-        if not client.is_connected():
-            disconnect_counter += 1
-            logger.warning(f"⚠️ Broker MQTT irraggiungibile. Watchdog {disconnect_counter}/5...")
+        try:
+            # Forza la conversione a intero per evitare crash silenziosi su time.sleep
+            update_interval = int(cfg['settings'].get('update_interval', 30))
             
-            # Dopo ~2.5 minuti di disconnessione (5 tentativi x 30s), killa il processo
-            if disconnect_counter >= 5:
-                logger.error("🚨 Connessione persa definitivamente. Chiusura forzata per riavvio tramite systemd...")
-                os._exit(1) 
-        else:
-            if disconnect_counter > 0:
-                logger.info("✅ Connessione MQTT ripristinata spontaneamente.")
-                disconnect_counter = 0
+            if not client.is_connected():
+                disconnect_counter += 1
+                logger.warning(f"⚠️ Broker MQTT irraggiungibile. Watchdog {disconnect_counter}/5...")
                 
-            status = publish_all(client)
-            publish_all_ini_files(client)
-            check_auto_healing(client, status)
+                if disconnect_counter >= 5:
+                    logger.error("🚨 Connessione persa definitivamente. Hard Kill del processo...")
+                    os._exit(1)
+            else:
+                if disconnect_counter > 0:
+                    logger.info("✅ Connessione MQTT ripristinata spontaneamente.")
+                    disconnect_counter = 0
+                    
+                # Le funzioni di sistema e file IO sono ora blindate per non far crashare il loop
+                status = publish_all(client)
+                publish_all_ini_files(client)
+                check_auto_healing(client, status)
+                
+        except Exception as e:
+            # Cattura e scrive nei log qualsiasi anomalia interna che prima uccideva il thread
+            logger.error(f"❌ Errore critico nel thread Watchdog: {e}")
             
-        time.sleep(update_interval)
+        try:
+            time.sleep(update_interval)
+        except Exception as e:
+            logger.error(f"⚠️ Errore nel timer di sleep: {e}")
+            time.sleep(30) # Fallback
 
 def start_service():
     global current_status
