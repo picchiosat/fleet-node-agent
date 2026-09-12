@@ -361,6 +361,28 @@ def on_message(client, userdata, msg):
             client.publish(TOPIC_STAT, current_status, retain=True)
             boot_recovered = True
             publish_all(client)
+            
+        elif cmd == "UPDATE_AGENT":
+            client.publish(f"devices/{CLIENT_ID}/logs", "🔄 Avvio aggiornamento OTA (git pull)...")
+            logger.info("Ricevuto comando di UPDATE_AGENT. Esecuzione git pull...")
+            try:
+                # Esegue il comando git pull nella directory dell'agente
+                result = subprocess.run(
+                    ["git", "pull"], 
+                    cwd=AGENT_DIR, 
+                    capture_output=True, text=True, check=True
+                )
+                client.publish(f"devices/{CLIENT_ID}/logs", f"✅ Git pull completato. Riavvio in corso...")
+                logger.info(f"Aggiornamento completato:\n{result.stdout}")
+                time.sleep(1)
+                
+                # Uccide il processo. Systemd lo farà ripartire istantaneamente con il nuovo codice!
+                os._exit(1)
+                
+            except subprocess.CalledProcessError as e:
+                client.publish(f"devices/{CLIENT_ID}/logs", f"❌ Errore aggiornamento:\n{e.stderr}")
+                logger.error(f"Errore git pull:\n{e.stderr}")
+                
         elif cmd == "REBOOT":
             client.publish(TOPIC_STAT, f"OFFLINE - Rebooting {CLIENT_ID.upper()}...", retain=False)
             logger.info("REBOOT command received. Rebooting system...")
@@ -421,7 +443,6 @@ def on_message(client, userdata, msg):
         logger.info("📥 Received global update command (REQ CONFIG)")
         publish_all(client)
         publish_all_ini_files(client)
-        # Force the visual update of the card on the dashboard!
         client.publish(TOPIC_STAT, current_status, retain=True)
     
     elif topic == f"devices/{CLIENT_ID}/control":
