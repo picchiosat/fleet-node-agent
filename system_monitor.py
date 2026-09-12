@@ -340,8 +340,8 @@ def on_connect(client, userdata, flags, reason_code, properties=None):
         logger.error(f"❌ MQTT connection error. Code: {reason_code}")
 
 def on_disconnect(client, userdata, disconnect_flags, reason_code, properties=None):
-    logger.warning(f"⚠️ Disconnected from MQTT broker! Code: {reason_code}")
-    logger.info("Waiting for network return. Paho-MQTT will attempt automatic reconnection...")
+    logger.error(f"⚠️ Disconnessione rilevata a basso livello (Codice: {reason_code}). Forzo il riavvio tramite systemd...")
+    os._exit(1)
 
 def on_message(client, userdata, msg):
     global boot_recovered, current_status, cfg
@@ -495,7 +495,7 @@ def start_service():
     while True:
         try:
             logger.info("Attempting connection to MQTT broker...")
-            client.connect(cfg['mqtt']['broker'], cfg['mqtt']['port'], 60)
+            client.connect(cfg['mqtt']['broker'], cfg['mqtt']['port'], 15)
             
             # 2. Start network manager in background (handles reconnections automatically!)
             client.loop_start() 
