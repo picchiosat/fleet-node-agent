@@ -10,10 +10,10 @@
         "tls": false
     },
     "paths": {
-        "file_list": "/opt/file_list.txt",
-        "process_list": "/opt/process_list.txt",
-        "last_profile": "/opt/last_profile.txt",
-        "state_file": "/opt/agent_state.json"
+        "file_list": "/opt/fleet-node-agent/file_list.txt",
+        "process_list": "/opt/fleet-node-agent/process_list.txt",
+        "last_profile": "/opt/fleet-node-agent/last_profile.txt",
+        "state_file": "/opt/fleet-node-agent/agent_state.json"
     },
     "settings": {
         "auto_healing": true,
