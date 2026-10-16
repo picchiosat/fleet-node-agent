@@ -1,0 +1,72 @@
+{
+    "client_id": "repeater_id",
+    "mqtt": {
+        "broker": "127.0.0.1",
+        "port": 1883,
+        "user": "mmdvm",
+        "password": "password",
+        "base_topic": "servizi/repeater_id",
+        "keepalive": 15,
+        "tls": false
+    },
+    "paths": {
+        "file_list": "/opt/file_list.txt",
+        "process_list": "/opt/process_list.txt",
+        "last_profile": "/opt/last_profile.txt",
+        "state_file": "/opt/agent_state.json"
+    },
+    "settings": {
+        "auto_healing": true,
+        "update_interval": 60,
+        "usb_reset_id": "",
+        "gpio_reset_pin": null,
+        "gpio_reset_auto": true,
+        "verify_seconds": 8,
+        "max_offline_seconds": 300,
+        "exit_on_disconnect": false,
+        "heal_grace_seconds": 20,
+        "startup_grace_seconds": 60,
+        "mask_passwords": true
+    },
+    "telegram": {
+        "enabled": false,
+        "token": "TOKEN ID",
+        "chat_id": "CHAT ID",
+        "quiet_hours": {
+            "start": 23,
+            "end": 7
+        }
+    },
+    "profiles": {
+        "A": {
+            "label": "Config BM",
+            "services": [
+                {
+                    "name": "mmdvmhost.service",
+                    "source": "/etc/MMDVMHost_BM.ini",
+                    "target": "/etc/MMDVMHost.ini"
+                },
+                {
+                    "name": "dmrgateway.service",
+                    "source": "/etc/DMRGateway_BM.ini",
+                    "target": "/etc/DMRGateway.ini"
+                }
+            ]
+        },
+        "B": {
+            "label": "Config PC",
+            "services": [
+                {
+                    "name": "mmdvmhost.service",
+                    "source": "/etc/MMDVMHost_PC.ini",
+                    "target": "/etc/MMDVMHost.ini"
+                },
+                {
+                    "name": "dmrgateway.service",
+                    "source": "/etc/DMRGateway_PC.ini",
+                    "target": "/etc/DMRGateway.ini"
+                }
+            ]
+        }
+    }
+}
