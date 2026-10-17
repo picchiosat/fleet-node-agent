@@ -511,11 +511,9 @@ def publish_telemetry():
     stems = [Path(f).stem for f in read_lines(FILE_LIST_PATH)]
     status["config_files"] = stems
     status["files"] = stems
-<<<<<<< HEAD
+
     # nomi completi con estensione (es. dstargateway.cfg): la dashboard li usa solo per l'etichetta
     status["file_names"] = [Path(f).name for f in read_lines(FILE_LIST_PATH)]
-=======
->>>>>>> 50f362009085ba48f19cd80b8453876407b3cb1d
     if connected():
         mqtt_client.publish(TOPIC_SERVICES, json.dumps(status), qos=1)
     return status
