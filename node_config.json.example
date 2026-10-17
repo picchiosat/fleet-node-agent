@@ -5,22 +5,37 @@
         "port": 1883,
         "user": "mmdvm",
         "password": "password",
-        "base_topic": "servizi/repeater_id"
+        "base_topic": "servizi/repeater_id",
+        "keepalive": 15,
+        "tls": false
     },
     "paths": {
-        "file_list": "/opt/file_list.txt",
-        "process_list": "/opt/process_list.txt"
+        "file_list": "/opt/fleet-node-agent/file_list.txt",
+        "process_list": "/opt/fleet-node-agent/process_list.txt",
+        "last_profile": "/opt/fleet-node-agent/last_profile.txt",
+        "state_file": "/opt/fleet-node-agent/agent_state.json"
     },
     "settings": {
         "auto_healing": true,
         "update_interval": 60,
         "usb_reset_id": "",
-        "gpio_reset_pin": 21
+        "gpio_reset_pin": null,
+        "gpio_reset_auto": true,
+        "verify_seconds": 8,
+        "max_offline_seconds": 300,
+        "exit_on_disconnect": false,
+        "heal_grace_seconds": 20,
+        "startup_grace_seconds": 60,
+        "mask_passwords": true
     },
     "telegram": {
         "enabled": false,
         "token": "TOKEN ID",
-        "chat_id": "CHAT ID"
+        "chat_id": "CHAT ID",
+        "quiet_hours": {
+            "start": 23,
+            "end": 7
+        }
     },
     "profiles": {
         "A": {

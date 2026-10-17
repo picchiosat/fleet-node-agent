@@ -1,3 +1,5 @@
-paho-mqtt
+paho-mqtt>=2.0
 psutil
 requests
+# Facoltativo, solo per il reset GPIO dell'HAT (Raspberry Pi) / Optional, only for the HAT GPIO reset:
+# RPi.GPIO
