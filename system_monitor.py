@@ -586,11 +586,12 @@ def get_system_status():
             for name in names:
                 n = name.strip().lower()
                 if n:
-                    status["processes"][n] = "online" if n in running else "offline"
+                    # MAGIA QUI: Controlla se il nome corrisponde, ignorando i trattini (mmdvmhost == mmdvm-host)
+                    is_online = any(r == n or r.replace('-', '') == n.replace('-', '') for r in running)
+                    status["processes"][n] = "online" if is_online else "offline"
         except Exception as e:
             logger.error(f"Process check error: {e}")
     return status
-
 
 def publish_telemetry():
     status = get_system_status()
