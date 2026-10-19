@@ -22,6 +22,7 @@ import signal
 import requests
 from pathlib import Path
 import logging
+import shutil
 from logging.handlers import RotatingFileHandler
 
 AGENT_VERSION = "2.0"
@@ -480,33 +481,47 @@ def get_cpu_temperature():
     return round(temp, 1)
 
 def get_binary_versions():
-    """Interroga direttamente tutti i binari della suite MMDVM."""
+    """Interroga direttamente tutti i binari della suite MMDVM con percorsi assoluti."""
     versions = {}
     
-    # Mappa: Nome da visualizzare -> Comando per interrogare il binario
+    def find_cmd(name):
+        # 1. Cerca nel PATH del demone (se presente)
+        cmd_path = shutil.which(name)
+        if cmd_path: 
+            return cmd_path
+        # 2. Fallback ai percorsi classici (Pi-Star o compilazioni manuali)
+        for base in ['/usr/local/bin', '/usr/bin', '/opt/MMDVMHost', '/opt/DMRGateway']:
+            full = os.path.join(base, name)
+            if os.path.isfile(full):
+                return full
+        return name # Se non lo trova, tenta comunque col nome semplice
+
     binaries = {
         "MMDVMHost": ["MMDVMHost", "-v"],
+        "MMDVMHost (alt)": ["MMDVM-Host", "-v"],
         "DMRGateway": ["DMRGateway", "-v"],
         "YSFGateway": ["YSFGateway", "-v"],
         "NXDNGateway": ["NXDNGateway", "-v"],
         "P25Gateway": ["P25Gateway", "-v"],
         "DStarGateway": ["dstargateway", "-v"],
-        "DStarGateway (alt)": ["dstar-gateway", "-v"] # Su alcuni sistemi c'è il trattino
+        "DStarGateway (alt)": ["dstar-gateway", "-v"]
     }
     
     for nome, comando in binaries.items():
-        r = run_cmd(comando, timeout=3)
+        cmd_reale = [find_cmd(comando[0]), comando[1]]
+        r = run_cmd(cmd_reale, timeout=3)
+        
         if r.returncode == 0 and r.stdout:
             # Prende solo la prima riga dell'output
             testo = r.stdout.strip().split('\n')[0] 
             
-            # Pulisce la stringa rimuovendo il prefisso tipo "MMDVMHost version "
+            # Pulisce la stringa
+            import re
             testo_pulito = re.sub(r'^[A-Za-z0-9_\-]+\s+version\s+', '', testo, flags=re.IGNORECASE)
             
-            # Normalizza il nome per DStarGateway (evita di mostrare "DStarGateway (alt)")
+            # Normalizza il nome
             chiave = "DStarGateway" if "DStar" in nome else nome
             
-            # Se la chiave non esiste o è vuota, aggiungila
             if chiave not in versions or versions[chiave] == "":
                 versions[chiave] = testo_pulito.strip()
             
