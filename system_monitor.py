@@ -460,7 +460,7 @@ def hardware_reset(auto=False):
 
 
 # ==========================================
-# 7. TELEMETRIA
+# 7. TELEMETRIA E LETTURA VERSIONI
 # ==========================================
 def get_cpu_temperature():
     temp = 0.0
@@ -479,6 +479,38 @@ def get_cpu_temperature():
         logger.debug(f"Temperature read error: {e}")
     return round(temp, 1)
 
+def get_binary_versions():
+    """Interroga direttamente tutti i binari della suite MMDVM."""
+    versions = {}
+    
+    # Mappa: Nome da visualizzare -> Comando per interrogare il binario
+    binaries = {
+        "MMDVMHost": ["MMDVMHost", "-v"],
+        "DMRGateway": ["DMRGateway", "-v"],
+        "YSFGateway": ["YSFGateway", "-v"],
+        "NXDNGateway": ["NXDNGateway", "-v"],
+        "P25Gateway": ["P25Gateway", "-v"],
+        "DStarGateway": ["dstargateway", "-v"],
+        "DStarGateway (alt)": ["dstar-gateway", "-v"] # Su alcuni sistemi c'è il trattino
+    }
+    
+    for nome, comando in binaries.items():
+        r = run_cmd(comando, timeout=3)
+        if r.returncode == 0 and r.stdout:
+            # Prende solo la prima riga dell'output
+            testo = r.stdout.strip().split('\n')[0] 
+            
+            # Pulisce la stringa rimuovendo il prefisso tipo "MMDVMHost version "
+            testo_pulito = re.sub(r'^[A-Za-z0-9_\-]+\s+version\s+', '', testo, flags=re.IGNORECASE)
+            
+            # Normalizza il nome per DStarGateway (evita di mostrare "DStarGateway (alt)")
+            chiave = "DStarGateway" if "DStar" in nome else nome
+            
+            # Se la chiave non esiste o è vuota, aggiungila
+            if chiave not in versions or versions[chiave] == "":
+                versions[chiave] = testo_pulito.strip()
+            
+    return versions
 
 def get_system_status():
     status = {
@@ -492,6 +524,7 @@ def get_system_status():
                      for k, v in cfg['profiles'].items()},
         "update_interval": get_update_interval(),     # il server ne ricava le soglie "agent muto"
         "agent_version": AGENT_VERSION,
+        "versions": get_binary_versions() # Estrazione versioni dai file binari
     }
     names = read_lines(PROCESS_LIST_PATH)
     if names:
