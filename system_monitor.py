@@ -481,20 +481,51 @@ def get_cpu_temperature():
     return round(temp, 1)
 
 def get_binary_versions():
-    """Interroga direttamente tutti i binari della suite MMDVM con percorsi assoluti."""
+    """Interroga direttamente tutti i binari della suite MMDVM supportando nomi multipli."""
     versions = {}
     
-    def find_cmd(name):
-        # 1. Cerca nel PATH del demone (se presente)
-        cmd_path = shutil.which(name)
-        if cmd_path: 
-            return cmd_path
-        # 2. Fallback ai percorsi classici (Pi-Star o compilazioni manuali)
-        for base in ['/usr/local/bin', '/usr/bin', '/opt/MMDVMHost', '/opt/DMRGateway']:
-            full = os.path.join(base, name)
-            if os.path.isfile(full):
-                return full
-        return name # Se non lo trova, tenta comunque col nome semplice
+    def find_cmd(names):
+        # Accetta una lista di nomi e li prova in ordine
+        for name in names:
+            cmd_path = shutil.which(name)
+            if cmd_path: 
+                return cmd_path
+            for base in ['/usr/local/bin', '/usr/bin', '/opt/MMDVMHost', '/opt/DMRGateway']:
+                full = os.path.join(base, name)
+                if os.path.isfile(full):
+                    return full
+        return names[0] # Se fallisce, tenta col primo nome di default
+
+    # Mappa: "Nome Bello da mostrare" -> ["Lista", "di", "eseguibili", "da", "cercare"]
+    binaries = {
+        "MMDVMHost": ["MMDVMHost", "MMDVM-Host"],
+        "DMRGateway": ["DMRGateway"],
+        "YSFGateway": ["YSFGateway"],
+        "NXDNGateway": ["NXDNGateway"],
+        "P25Gateway": ["P25Gateway"],
+        "DStarGateway": ["dstargateway", "dstar-gateway"]
+    }
+    
+    for chiave, lista_eseguibili in binaries.items():
+        cmd_reale = [find_cmd(lista_eseguibili), "-v"]
+        r = run_cmd(cmd_reale, timeout=3)
+        
+        if r.returncode == 0 and r.stdout:
+            testo = r.stdout.strip().split('\n')[0] 
+            
+            import re
+            testo_pulito = re.sub(r'^[A-Za-z0-9_\-]+\s+version\s+', '', testo, flags=re.IGNORECASE)
+            
+            # Pulizia extra per DStarGateway (rimuove il blocco Copyright lunghissimo)
+            if "Copyright" in testo_pulito:
+                testo_pulito = testo_pulito.split("Copyright")[0].replace("DStarGateway", "").strip()
+                if testo_pulito.startswith("v"):
+                    testo_pulito = testo_pulito[1:] # Toglie la 'v' iniziale
+            
+            if chiave not in versions or versions[chiave] == "":
+                versions[chiave] = testo_pulito.strip()
+            
+    return versions
 
     binaries = {
         "MMDVMHost": ["MMDVMHost", "-v"],
