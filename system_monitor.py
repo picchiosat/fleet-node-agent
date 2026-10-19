@@ -519,6 +519,13 @@ def get_binary_versions():
             import re
             testo_pulito = re.sub(r'^[A-Za-z0-9_\-]+\s+version\s+', '', testo, flags=re.IGNORECASE)
             
+            # --- PULIZIA EXTRA PER DSTARGATEWAY ---
+            if "Copyright" in testo_pulito:
+                testo_pulito = testo_pulito.split("Copyright")[0].replace("DStarGateway", "").strip()
+                if testo_pulito.startswith("v"):
+                    testo_pulito = testo_pulito[1:] # Toglie la 'v' iniziale per uniformità
+            # --------------------------------------
+
             # Normalizza il nome
             chiave = "DStarGateway" if "DStar" in nome else nome
             
