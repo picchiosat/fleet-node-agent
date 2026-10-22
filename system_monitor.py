@@ -25,7 +25,20 @@ import logging
 import shutil
 from logging.handlers import RotatingFileHandler
 
-AGENT_VERSION = "2.0"
+AGENT_VERSION = "2.2"
+
+# --- CALCOLO HASH GIT ---
+def get_agent_commit():
+    try:
+        r = subprocess.run(["git", "rev-parse", "--short", "HEAD"], 
+                           cwd=AGENT_DIR, capture_output=True, text=True, timeout=5)
+        if r.returncode == 0 and r.stdout.strip():
+            return r.stdout.strip()
+    except Exception:
+        pass
+    return "unknown"
+
+AGENT_GIT_HASH = get_agent_commit()
 
 # --- CALCOLO PERCORSI DINAMICI ---
 AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -591,7 +604,7 @@ def get_system_status():
         "profiles": {k: (v.get('label', f'PROFILE {k}') if isinstance(v, dict) else f'PROFILE {k}')
                      for k, v in cfg['profiles'].items()},
         "update_interval": get_update_interval(),
-        "agent_version": AGENT_VERSION,
+        "agent_version": f"{AGENT_VERSION} ({AGENT_GIT_HASH})",
         "agent_update_available": agent_update_available, 
         "versions": get_binary_versions(),
         "uptime_seconds": int(time.time() - psutil.boot_time())
