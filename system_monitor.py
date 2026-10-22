@@ -575,9 +575,10 @@ def get_system_status():
         "timestamp": time.strftime("%H:%M:%S"),
         "profiles": {k: (v.get('label', f'PROFILE {k}') if isinstance(v, dict) else f'PROFILE {k}')
                      for k, v in cfg['profiles'].items()},
-        "update_interval": get_update_interval(),     # il server ne ricava le soglie "agent muto"
+        "update_interval": get_update_interval(),
         "agent_version": AGENT_VERSION,
-        "versions": get_binary_versions() # Estrazione versioni dai file binari
+        "versions": get_binary_versions(),
+        "uptime_seconds": int(time.time() - psutil.boot_time()) # <-- NUOVA RIGA AGIUNTA
     }
     names = read_lines(PROCESS_LIST_PATH)
     if names:
