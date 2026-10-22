@@ -128,6 +128,21 @@ stopped_by_admin = set()          # servizi fermati volontariamente dalla dashbo
 ops_lock = threading.RLock()      # una sola operazione "pesante" alla volta (profilo, config, reset, update...)
 heal_pause_until = 0.0
 disconnected_since = None
+agent_update_available = False
+
+def update_checker_loop():
+    """Controlla ogni ora se ci sono aggiornamenti sul branch remoto."""
+    global agent_update_available
+    while True:
+        try:
+            subprocess.run(["git", "fetch"], timeout=20, cwd=AGENT_DIR)
+            local = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=AGENT_DIR).decode('utf-8').strip()
+            remote = subprocess.check_output(["git", "rev-parse", "@{u}"], cwd=AGENT_DIR).decode('utf-8').strip()
+            agent_update_available = (local != remote)
+        except Exception as e:
+            logger.debug(f"Errore check update agent: {e}")
+        time.sleep(3600)  # Controlla ogni ora
+
 published_sig = {}                # percorso file -> (mtime_ns, size) dell'ultima versione pubblicata
 _warned_units = set()
 
@@ -577,8 +592,9 @@ def get_system_status():
                      for k, v in cfg['profiles'].items()},
         "update_interval": get_update_interval(),
         "agent_version": AGENT_VERSION,
+        "agent_update_available": agent_update_available, 
         "versions": get_binary_versions(),
-        "uptime_seconds": int(time.time() - psutil.boot_time()) # <-- NUOVA RIGA AGIUNTA
+        "uptime_seconds": int(time.time() - psutil.boot_time())
     }
     names = read_lines(PROCESS_LIST_PATH)
     if names:
@@ -1234,7 +1250,8 @@ def start_service():
     client.on_message = on_message
 
     for target, name in ((command_worker, "commands"), (telegram_worker, "telegram"),
-                         (telemetry_loop, "telemetry"), (watchdog_loop, "watchdog")):
+                         (telemetry_loop, "telemetry"), (watchdog_loop, "watchdog"),
+                         (update_checker_loop, "update_checker")): # <-- AGGIUNTO update_checker
         threading.Thread(target=target, name=name, daemon=True).start()
 
     signal.signal(signal.SIGTERM, shutdown_handler)
