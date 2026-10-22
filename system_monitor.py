@@ -27,10 +27,14 @@ from logging.handlers import RotatingFileHandler
 
 AGENT_VERSION = "2.2"
 
+# --- CALCOLO PERCORSI DINAMICI ---
+AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_FILE = os.path.join(AGENT_DIR, 'node_agent.log')
+CONFIG_FILE = os.environ.get('FLEET_AGENT_CONFIG', os.path.join(AGENT_DIR, 'node_config.json'))
+
 # --- CALCOLO HASH GIT ---
 def get_agent_commit():
     try:
-        # Aggiungiamo -c safe.directory=* per evitare blocchi di permessi da systemd/root
         r = subprocess.run(["git", "-c", "safe.directory=*", "rev-parse", "--short", "HEAD"], 
                            cwd=AGENT_DIR, capture_output=True, text=True, timeout=5)
         if r.returncode == 0 and r.stdout.strip():
