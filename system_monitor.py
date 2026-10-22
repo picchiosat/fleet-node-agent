@@ -30,7 +30,8 @@ AGENT_VERSION = "2.2"
 # --- CALCOLO HASH GIT ---
 def get_agent_commit():
     try:
-        r = subprocess.run(["git", "rev-parse", "--short", "HEAD"], 
+        # Aggiungiamo -c safe.directory=* per evitare blocchi di permessi da systemd/root
+        r = subprocess.run(["git", "-c", "safe.directory=*", "rev-parse", "--short", "HEAD"], 
                            cwd=AGENT_DIR, capture_output=True, text=True, timeout=5)
         if r.returncode == 0 and r.stdout.strip():
             return r.stdout.strip()
@@ -39,6 +40,7 @@ def get_agent_commit():
     return "unknown"
 
 AGENT_GIT_HASH = get_agent_commit()
+agent_update_available = False
 
 # --- CALCOLO PERCORSI DINAMICI ---
 AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -148,15 +150,15 @@ def update_checker_loop():
     global agent_update_available
     while True:
         try:
-            subprocess.run(["git", "fetch"], timeout=20, cwd=AGENT_DIR)
-            local = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=AGENT_DIR).decode('utf-8').strip()
-            remote = subprocess.check_output(["git", "rev-parse", "@{u}"], cwd=AGENT_DIR).decode('utf-8').strip()
+            subprocess.run(["git", "-c", "safe.directory=*", "fetch"], timeout=20, cwd=AGENT_DIR)
+            local = subprocess.check_output(["git", "-c", "safe.directory=*", "rev-parse", "HEAD"], cwd=AGENT_DIR).decode('utf-8').strip()
+            remote = subprocess.check_output(["git", "-c", "safe.directory=*", "rev-parse", "@{u}"], cwd=AGENT_DIR).decode('utf-8').strip()
             agent_update_available = (local != remote)
         except Exception as e:
             logger.debug(f"Errore check update agent: {e}")
-        time.sleep(3600)  # Controlla ogni ora
+        time.sleep(3600)
 
-published_sig = {}                # percorso file -> (mtime_ns, size) dell'ultima versione pubblicata
+published_sig = {}      # percorso file -> (mtime_ns, size) dell'ultima versione pubblicata
 _warned_units = set()
 
 cmd_queue = queue.Queue(maxsize=20)
