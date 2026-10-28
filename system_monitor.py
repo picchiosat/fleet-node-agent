@@ -22,7 +22,6 @@ import signal
 import requests
 from pathlib import Path
 import logging
-import shutil
 from logging.handlers import RotatingFileHandler
 
 AGENT_VERSION = "2.2"
@@ -45,11 +44,6 @@ def get_agent_commit():
 
 AGENT_GIT_HASH = get_agent_commit()
 agent_update_available = False
-
-# --- CALCOLO PERCORSI DINAMICI ---
-AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
-LOG_FILE = os.path.join(AGENT_DIR, 'node_agent.log')
-CONFIG_FILE = os.environ.get('FLEET_AGENT_CONFIG', os.path.join(AGENT_DIR, 'node_config.json'))
 
 # ==========================================
 # 0. LOGGING & HARDWARE CONFIGURATION
@@ -80,7 +74,6 @@ except RuntimeError as e:
 # 1. CONFIGURATION LOADING (con validazione)
 # ==========================================
 CONFIG_PATH = Path(CONFIG_FILE)
-
 
 def load_config():
     try:
@@ -147,7 +140,6 @@ stopped_by_admin = set()          # servizi fermati volontariamente dalla dashbo
 ops_lock = threading.RLock()      # una sola operazione "pesante" alla volta (profilo, config, reset, update...)
 heal_pause_until = 0.0
 disconnected_since = None
-agent_update_available = False
 
 def update_checker_loop():
     """Controlla ogni ora se ci sono aggiornamenti sul branch remoto."""
@@ -202,8 +194,7 @@ def redact(text):
 
 
 def safe_write_bytes(path, data):
-    """Scrittura atomica (file temporaneo + fsync + replace) mantenendo permessi e proprietario.
-    Se la directory non è scrivibile (es. /etc con file concesso all'utente) ripiega sulla scrittura in-place."""
+    """Scrittura atomica (file temporaneo + fsync + replace) mantenendo permessi e proprietario."""
     path = str(path)
     tmp = f"{path}.tmp.{os.getpid()}"
     try:
@@ -241,7 +232,7 @@ def safe_write_text(path, text):
 
 
 def run_cmd(args, timeout=30, cwd=None):
-    """Esegue un comando SENZA shell e con timeout. rc=124 timeout, rc=127 comando mancante."""
+    """Esegue un comando SENZA shell e con timeout."""
     try:
         return subprocess.run(args, capture_output=True, text=True, timeout=timeout, cwd=cwd)
     except subprocess.TimeoutExpired:
@@ -254,7 +245,7 @@ def run_cmd(args, timeout=30, cwd=None):
 
 
 def read_lines(path):
-    """Righe non vuote e non commentate di un file di testo ([] se manca)."""
+    """Righe non vuote e non commentate di un file di testo."""
     try:
         p = Path(str(path))
         if not str(path) or not p.is_file():
@@ -279,7 +270,7 @@ def log_to_broker(msg):
 
 
 def publish_status():
-    """Stato del nodo (retained). Va ripubblicato a ogni connessione: dopo un blip il LWT l'ha messo OFFLINE."""
+    """Stato del nodo (retained). Va ripubblicato a ogni connessione."""
     try:
         if mqtt_client is not None:
             mqtt_client.publish(TOPIC_STAT, current_status, qos=1, retain=True)
@@ -288,7 +279,7 @@ def publish_status():
 
 
 def note_ops_done():
-    """Dopo un'operazione l'auto-healing resta in pausa qualche secondo (i servizi stanno ripartendo)."""
+    """Dopo un'operazione l'auto-healing resta in pausa qualche secondo."""
     global heal_pause_until
     heal_pause_until = time.time() + int_setting('heal_grace_seconds', 20, 0)
 
@@ -342,7 +333,6 @@ def telegram_worker():
             if not r.ok:
                 logger.error(f"Telegram HTTP {r.status_code}")
         except Exception as e:
-            # l'eccezione di requests contiene l'URL con il token: va ripulita
             logger.error(f"Telegram sending error: {type(e).__name__}: {redact(e)}")
 
 
@@ -382,7 +372,7 @@ def get_actual_config_from_disk():
                     return f"ONLINE - {label}"
     except Exception as e:
         logger.error(f"Errore lettura memoria profilo: {e}")
-    return "ONLINE"  # Default se il file non esiste o è vuoto
+    return "ONLINE"
 
 
 def save_last_profile(label):
@@ -396,7 +386,6 @@ def save_last_profile(label):
 # 5. SYSTEMD: NOMI UNITÀ (whitelist) E CONTROLLI
 # ==========================================
 def build_unit_map():
-    """nome normalizzato -> nome unità. Solo ciò che il nodo conosce: process_list, profili, settings.service_map."""
     m = {}
     for name in read_lines(PROCESS_LIST_PATH):
         n = norm_name(name)
@@ -436,7 +425,6 @@ def unit_is_disabled(unit):
 
 
 def wait_units_active(units, seconds):
-    """Attende fino a `seconds` che tutte le unità siano attive. Ritorna la lista di quelle NON attive."""
     deadline = time.monotonic() + seconds
     pending = list(units)
     while True:
@@ -452,7 +440,7 @@ def wait_units_active(units, seconds):
 def gpio_pin_config():
     pin = cfg['settings'].get('gpio_reset_pin')
     if pin in (None, '', 0, False):
-        return None            # nessun default implicito: il GPIO si usa solo se configurato
+        return None
     try:
         return int(pin)
     except (TypeError, ValueError):
@@ -460,7 +448,6 @@ def gpio_pin_config():
 
 
 def hardware_reset(auto=False):
-    """Reset del modem. Ritorna {"attempted", "ok", "method", "msg"}."""
     usb_id = str(cfg['settings'].get('usb_reset_id') or '').strip()
     if usb_id:
         if not USB_ID_RE.match(usb_id):
@@ -519,7 +506,6 @@ def get_binary_versions():
     versions = {}
     
     def find_cmd(names):
-        # Accetta una lista di nomi e li prova in ordine
         for name in names:
             cmd_path = shutil.which(name)
             if cmd_path: 
@@ -528,9 +514,8 @@ def get_binary_versions():
                 full = os.path.join(base, name)
                 if os.path.isfile(full):
                     return full
-        return names[0] # Se fallisce, tenta col primo nome di default
+        return names[0]
 
-    # Mappa: "Nome Bello da mostrare" -> ["Lista", "di", "eseguibili", "da", "cercare"]
     binaries = {
         "MMDVMHost": ["MMDVMHost", "MMDVM-Host"],
         "DMRGateway": ["DMRGateway"],
@@ -550,49 +535,10 @@ def get_binary_versions():
             import re
             testo_pulito = re.sub(r'^[A-Za-z0-9_\-]+\s+version\s+', '', testo, flags=re.IGNORECASE)
             
-            # Pulizia extra per DStarGateway (rimuove il blocco Copyright lunghissimo)
             if "Copyright" in testo_pulito:
                 testo_pulito = testo_pulito.split("Copyright")[0].replace("DStarGateway", "").strip()
                 if testo_pulito.startswith("v"):
-                    testo_pulito = testo_pulito[1:] # Toglie la 'v' iniziale
-            
-            if chiave not in versions or versions[chiave] == "":
-                versions[chiave] = testo_pulito.strip()
-            
-    return versions
-
-    binaries = {
-        "MMDVMHost": ["MMDVMHost", "-v"],
-        "MMDVMHost (alt)": ["MMDVM-Host", "-v"],
-        "DMRGateway": ["DMRGateway", "-v"],
-        "YSFGateway": ["YSFGateway", "-v"],
-        "NXDNGateway": ["NXDNGateway", "-v"],
-        "P25Gateway": ["P25Gateway", "-v"],
-        "DStarGateway": ["dstargateway", "-v"],
-        "DStarGateway (alt)": ["dstar-gateway", "-v"]
-    }
-    
-    for nome, comando in binaries.items():
-        cmd_reale = [find_cmd(comando[0]), comando[1]]
-        r = run_cmd(cmd_reale, timeout=3)
-        
-        if r.returncode == 0 and r.stdout:
-            # Prende solo la prima riga dell'output
-            testo = r.stdout.strip().split('\n')[0] 
-            
-            # Pulisce la stringa
-            import re
-            testo_pulito = re.sub(r'^[A-Za-z0-9_\-]+\s+version\s+', '', testo, flags=re.IGNORECASE)
-            
-            # --- PULIZIA EXTRA PER DSTARGATEWAY ---
-            if "Copyright" in testo_pulito:
-                testo_pulito = testo_pulito.split("Copyright")[0].replace("DStarGateway", "").strip()
-                if testo_pulito.startswith("v"):
-                    testo_pulito = testo_pulito[1:] # Toglie la 'v' iniziale per uniformità
-            # --------------------------------------
-
-            # Normalizza il nome
-            chiave = "DStarGateway" if "DStar" in nome else nome
+                    testo_pulito = testo_pulito[1:] 
             
             if chiave not in versions or versions[chiave] == "":
                 versions[chiave] = testo_pulito.strip()
@@ -618,15 +564,45 @@ def get_system_status():
     names = read_lines(PROCESS_LIST_PATH)
     if names:
         try:
-            running = {(p.info.get('name') or '').lower() for p in psutil.process_iter(['name'])}
+            # Recupera la porta MQTT usata dal nodo (es. 1883)
+            broker_port = int(MQTT_CFG.get('port', 1883))
+            
+            # Prende tutti i processi in esecuzione
+            running_procs = list(psutil.process_iter(['name']))
+            
             for name in names:
                 n = name.strip().lower()
                 if n:
-                    # MAGIA QUI: Controlla se il nome corrisponde, ignorando i trattini (mmdvmhost == mmdvm-host)
-                    is_online = any(r == n or r.replace('-', '') == n.replace('-', '') for r in running)
-                    status["processes"][n] = "online" if is_online else "offline"
+                    # Trova i processi che matchano il nome (ignorando i trattini)
+                    matching_procs = [p for p in running_procs if (p.info.get('name') or '').lower() in (n, n.replace('-', ''))]
+                    
+                    if not matching_procs:
+                        status["processes"][n] = "offline"
+                    else:
+                        is_mqtt_connected = False
+                        
+                        for p in matching_procs:
+                            try:
+                                # Controlla i socket di rete del processo
+                                for conn in p.connections(kind='inet'):
+                                    # Se c'è una connessione stabilita verso la porta del broker, è ok
+                                    if conn.status == 'ESTABLISHED' and conn.raddr and conn.raddr.port == broker_port:
+                                        is_mqtt_connected = True
+                                        break
+                            except (psutil.AccessDenied, psutil.NoSuchProcess):
+                                # Se l'agent non ha i permessi per leggere i socket, 
+                                # diamo il beneficio del dubbio per evitare falsi positivi
+                                is_mqtt_connected = True
+                                
+                            if is_mqtt_connected:
+                                break
+                                
+                        # Se è in esecuzione ma senza connessione MQTT, lo dichiariamo 'disconnected'
+                        status["processes"][n] = "online" if is_mqtt_connected else "disconnected"
+                        
         except Exception as e:
             logger.error(f"Process check error: {e}")
+            
     return status
 
 def publish_telemetry():
@@ -635,7 +611,6 @@ def publish_telemetry():
     status["config_files"] = stems
     status["files"] = stems
 
-    # nomi completi con estensione (es. dstargateway.cfg): la dashboard li usa solo per l'etichetta
     status["file_names"] = [Path(f).name for f in read_lines(FILE_LIST_PATH)]
     if connected():
         mqtt_client.publish(TOPIC_SERVICES, json.dumps(status), qos=1)
@@ -643,7 +618,7 @@ def publish_telemetry():
 
 
 # ==========================================
-# 8. PUBBLICAZIONE CONFIGURAZIONI (solo se cambiate)
+# 8. PUBBLICAZIONE CONFIGURAZIONI
 # ==========================================
 def parse_ini(text):
     ini_data = {}
@@ -666,7 +641,7 @@ def parse_ini(text):
 
 
 def mask_sensitive(ini_data):
-    """Nasconde Password/Secret/Token nei topic per sezione (NON tocca PassAllTG/PassAllPC, che servono al server)."""
+    """Nasconde Password/Secret/Token nei topic per sezione."""
     for payload in ini_data.values():
         for k, v in payload.items():
             if SENSITIVE_KEY_RE.match(k) and str(v).strip():
@@ -675,7 +650,6 @@ def mask_sensitive(ini_data):
 
 
 def profile_only_sources():
-    """File usati solo come sorgente di un profilo (es. *_BM.ini): per l'editor basta full_config."""
     sources, targets = set(), set()
     for profile in cfg['profiles'].values():
         for s in (profile.get('services', []) if isinstance(profile, dict) else []):
@@ -687,7 +661,6 @@ def profile_only_sources():
 
 
 def publish_configs(force=False):
-    """Pubblica full_config e sezioni INI (retained) SOLO per i file cambiati dall'ultima volta."""
     if not connected():
         return
     skip_sections = profile_only_sources()
@@ -729,8 +702,6 @@ def find_profile(key):
 
 
 def switch_config(key):
-    """Ritorna (ok, label_o_errore). Non tocca nessun servizio se i controlli preliminari falliscono;
-    se qualcosa va storto ripristina la configurazione precedente e riavvia i servizi."""
     pkey, profile = find_profile(key)
     if not profile:
         return False, f"Profile {key} not found in JSON"
@@ -739,7 +710,6 @@ def switch_config(key):
     if not services:
         return False, f"No services configured for {pkey}"
 
-    # --- CONTROLLI PRELIMINARI (prima di fermare qualsiasi cosa) ---
     for s in services:
         name, src, dst = s.get('name'), s.get('source'), s.get('target')
         if not (name and src and dst):
@@ -805,7 +775,6 @@ def switch_config(key):
 # 10. SCRITTURA CONFIG DA REMOTO
 # ==========================================
 def service_for_file(path):
-    """Servizio da riavviare dopo la modifica di un file di configurazione (None = nessuno)."""
     stem = Path(path).stem
     unit = resolve_unit(stem)
     if unit:
@@ -884,7 +853,7 @@ def check_auto_healing(status):
         return
     if time.time() < heal_pause_until:
         return
-    if not ops_lock.acquire(blocking=False):   # c'è un'operazione in corso: ci riprovo al prossimo giro
+    if not ops_lock.acquire(blocking=False):   
         return
     try:
         _heal(status)
@@ -897,7 +866,8 @@ def _heal(status):
     for proc_name, state in status["processes"].items():
         norm = norm_name(proc_name)
 
-        if state == "online":
+        # Se il processo è online oppure è in esecuzione ma in attesa del broker (disconnected), non riavviarlo
+        if state in ("online", "disconnected"):
             auto_healing_counter[proc_name] = 0
             if norm in stopped_by_admin:
                 stopped_by_admin.discard(norm)
@@ -906,6 +876,7 @@ def _heal(status):
 
         if norm in stopped_by_admin:
             continue                                  # fermato volontariamente dalla dashboard
+            
         unit = resolve_unit(norm)
         if not unit or not unit_exists(unit) or unit_is_disabled(unit):
             if norm not in _warned_units:
@@ -939,7 +910,7 @@ def _heal(status):
 
 
 # ==========================================
-# 12. COMANDI (eseguiti da un thread dedicato, mai nella callback MQTT)
+# 12. COMANDI
 # ==========================================
 def enqueue(name, fn):
     try:
@@ -972,7 +943,7 @@ def do_switch_profile(key):
         logger.error(f"Cambio profilo fallito: {text}")
         log_to_broker(f"❌ {text}")
         send_telegram_message(f"❌ Profile switch failed: {text}")
-    publish_status()          # anche in caso di errore: il server esce dallo stato "Sent..."
+    publish_status()          
     publish_telemetry()
     publish_configs()
 
@@ -999,7 +970,6 @@ def do_update_agent():
             publish_status()
             return
 
-        # La nuova versione deve almeno essere sintatticamente valida, altrimenti il nodo resterebbe irraggiungibile
         check = run_cmd([sys.executable, "-c",
                          "import ast,sys; ast.parse(open(sys.argv[1], encoding='utf-8').read())",
                          os.path.abspath(__file__)], timeout=30)
@@ -1015,7 +985,6 @@ def do_update_agent():
         log_to_broker("✅ Git pull completato. Riavvio in corso...")
         logger.info(f"Aggiornamento completato:\n{pull.stdout}")
         time.sleep(1)
-        # Systemd (Restart=always) lo fa ripartire con il nuovo codice
         os._exit(1)
 
 
@@ -1053,7 +1022,6 @@ def do_reset_hat():
 
 def do_toggle_telegram(new_state):
     try:
-        # si parte dal file su disco (non dalla copia in memoria) per non perdere modifiche fatte a mano
         with open(CONFIG_PATH, 'r') as f:
             disk = json.load(f)
         if not isinstance(disk.get('telegram'), dict):
@@ -1081,7 +1049,7 @@ def do_service_control(action, service):
         if r.returncode == 0:
             n = norm_name(service)
             if action == "stop":
-                stopped_by_admin.add(n)       # l'auto-healing non lo rialzerà
+                stopped_by_admin.add(n)       
             else:
                 stopped_by_admin.discard(n)
             save_state()
@@ -1097,7 +1065,7 @@ def do_service_control(action, service):
 
 
 def do_global_request():
-    time.sleep(random.uniform(0, 5))      # evita che tutta la flotta risponda nello stesso istante
+    time.sleep(random.uniform(0, 5))      
     publish_telemetry()
     publish_configs(force=True)
     publish_status()
@@ -1109,7 +1077,7 @@ def initial_publish():
 
 
 # ==========================================
-# 13. MQTT CALLBACKS (leggere: validano e mettono in coda)
+# 13. MQTT CALLBACKS
 # ==========================================
 def handle_command(payload):
     cmd = payload.upper()
@@ -1149,7 +1117,7 @@ def on_connect(client, userdata, flags, reason_code, properties=None):
             (TOPIC_CONTROL, 0),
             (TOPIC_CONFIG_SET + "#", 0)
         ])
-        publish_status()                       # a ogni connessione: dopo un blip il LWT ha messo il nodo OFFLINE
+        publish_status()                       
         enqueue("initial publish", initial_publish)
     else:
         logger.error(f"❌ MQTT connection error. Code: {reason_code}")
@@ -1204,7 +1172,7 @@ def telemetry_loop():
                 publish_configs()
             else:
                 status = get_system_status()
-            check_auto_healing(status)      # l'auto-healing è locale: funziona anche senza broker
+            check_auto_healing(status)      
         except Exception as e:
             logger.error(f"❌ Errore critico nel thread telemetria: {e}")
         time.sleep(get_update_interval())
@@ -1270,14 +1238,13 @@ def start_service():
 
     for target, name in ((command_worker, "commands"), (telegram_worker, "telegram"),
                          (telemetry_loop, "telemetry"), (watchdog_loop, "watchdog"),
-                         (update_checker_loop, "update_checker")): # <-- AGGIUNTO update_checker
+                         (update_checker_loop, "update_checker")): 
         threading.Thread(target=target, name=name, daemon=True).start()
 
     signal.signal(signal.SIGTERM, shutdown_handler)
     signal.signal(signal.SIGINT, shutdown_handler)
 
     logger.info(f"Node agent v{AGENT_VERSION} avviato ({CLIENT_ID.upper()}). Connessione al broker...")
-    # connect_async + loop_start: paho gestisce da solo primo collegamento e riconnessioni
     client.connect_async(MQTT_CFG['broker'], int(MQTT_CFG['port']), int(MQTT_CFG.get('keepalive', 15)))
     client.loop_start()
 
