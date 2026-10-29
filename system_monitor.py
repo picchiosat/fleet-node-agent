@@ -574,7 +574,7 @@ def get_system_status():
                 n = name.strip().lower()
                 if n:
                     # Trova i processi che matchano il nome (ignorando i trattini)
-                    matching_procs = [p for p in running_procs if (p.info.get('name') or '').lower() in (n, n.replace('-', ''))]
+                    matching_procs = [p for p in running_procs if (p.info.get('name') or '').lower().replace('-', '') == n.replace('-', '')]
                     
                     if not matching_procs:
                         status["processes"][n] = "offline"
