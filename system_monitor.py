@@ -583,8 +583,9 @@ def get_system_status():
                         
                         for p in matching_procs:
                             try:
-                                # Controlla i socket di rete del processo
-                                for conn in p.connections(kind='inet'):
+                                # Controlla i socket di rete del processo in modo retrocompatibile
+                                conn_func = getattr(p, "net_connections", p.connections)
+                                for conn in conn_func(kind='inet'):
                                     # Se c'è una connessione stabilita verso la porta del broker, è ok
                                     if conn.status == 'ESTABLISHED' and conn.raddr and conn.raddr.port == broker_port:
                                         is_mqtt_connected = True
